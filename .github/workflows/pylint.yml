@@ -17,7 +17,16 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pylint
+          # 1. Fetch exact dependency constraints to prevent dependency hell
+        AIRFLOW_VERSION=2.10.0
+        CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${{ matrix.python-version }}.txt"
+        
+        # 2. Install Airflow, Pylint, and the dedicated Airflow plugin together
+        pip install "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
+        pip install pylint pylint-airflow
+        
     - name: Analysing the code with pylint
       run: |
-        pylint $(git ls-files '*.py')
+        # --load-plugins flags Airflow objects correctly
+        # --disable=pointless-statement permits tasks chained together with '>>'
+        pylint --load-plugins=pylint_airflow --disable=pointless-statement $(git ls-files '*.py')
