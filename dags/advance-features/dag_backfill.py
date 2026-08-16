@@ -21,11 +21,11 @@ default_args = {
 
 # Define the DAG
 dag = DAG(
-    'catchup_and_backfill_dag',             # DAG ID
-    default_args=default_args,     # Default arguments for the DAG
+    'catchup_and_backfill_dag', # DAG ID
+    default_args=default_args, # Default arguments for the DAG
     description='catchup and backfill',
     tags=['Data Engineering courses',"Advanced"],
-    catchup = True,              
+    catchup = True,
     schedule='30 10 * * *' #  Dag Run = start_date + schedule -> 2026/07/21 at 10:30
 )
 

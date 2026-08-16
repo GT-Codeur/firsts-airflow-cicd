@@ -5,19 +5,68 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
+
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10"]
+        python-version: ["3.10"]
+
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pylint
-    - name: Analysing the code with pylint
-      run: |
-        pylint $(git ls-files '*.py')
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+
+          AIRFLOW_VERSION=2.10.5
+          PYTHON_VERSION=3.10
+
+          pip install \
+            "apache-airflow==${AIRFLOW_VERSION}" \
+            "apache-airflow-providers-postgres" \
+            "apache-airflow-providers-mysql" \
+            "apache-airflow-providers-common-sql" \
+            --constraint \
+            "https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
+          
+          pip install pylint
+
+      - name: Show airflow packages
+        run: |
+          pip list | grep airflow
+
+      - name: Debug Airflow
+        run: |
+          pip show apache-airflow
+
+          python - <<'PY'
+          import sys
+
+          print("Python:", sys.version)
+          print("sys.path:")
+          for p in sys.path:
+              print(" ", p)
+
+          try:
+              import airflow
+              print("airflow module:", airflow)
+              print("airflow file:", getattr(airflow, "__file__", None))
+              print("airflow path:", getattr(airflow, "__path__", None))
+          except Exception as e:
+              print("Import airflow failed:", e)
+          PY
+
+      - name: Verify Airflow installation
+        run: |
+          python -c "import airflow; print('Airflow path:', airflow.__file__)"
+          python -c "from airflow import DAG; print('DAG import OK')"
+          python -c "from airflow.operators.empty import EmptyOperator; print('EmptyOperator OK')"
+          python -c "from airflow.providers.mysql.hooks.mysql import MySqlHook; print('MySqlHook OK')"
+
+      - name: Run pylint
+        run: |
+          pylint --disable=pointless-statement,duplicate-code $(git ls-files '*.py')

@@ -8,9 +8,9 @@ Contains several BashOperator tasks that echo short messages and create a
 sample text file. Intended as an introductory example for DAG authors.
 """
 
+from datetime import datetime
 from airflow import DAG
 from airflow.operators.bash import BashOperator
-from datetime import datetime
 
 # Define argument for the DAG
 default_args = {
