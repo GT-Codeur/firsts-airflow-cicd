@@ -13,7 +13,8 @@ from datetime import datetime
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 
-# Default arguments for the DAG. These are common configurations that apply to the DAG and its tasks.
+# Default arguments for the DAG.
+# These are common configurations that apply to the DAG and its tasks.
 default_args = {
     'owner': 'Germain',                          # Owner of the DAG
     'start_date': datetime(2026, 8, 8),          # Start date for the DAG
@@ -26,7 +27,10 @@ dag = DAG(
     description='XCom DAG',   # Description of the DAG's purpose
     tags=['Data Engineering courses',"Advanced"],
     schedule='@daily',                  # How often to run the DAG. '@daily' means once a day.
-    catchup=False                                # If set to True, Airflow will execute all instances between the DAG's start_date and the current day. Setting to False means skipping missed instances.
+    # If set to True,
+    # Airflow will execute all instances between the DAG's start_date and the current day.
+    # Setting to False means skipping missed instances.
+    catchup=False
 )
 
 
@@ -41,14 +45,15 @@ def push_xcom_value(**kwargs):
     retrieve it with `xcom_pull`.
     """
     value_to_push = "This is the pushed value!"
-    kwargs['ti'].xcom_push(key='sample_key', value=value_to_push)  # Using the xcom_push method to push a value to XCom
+    # Using the xcom_push method to push a value to XCom
+    kwargs['ti'].xcom_push(key='sample_key', value=value_to_push)
 
 
 push_task = PythonOperator(
-    task_id='push_task',                        # Unique identifier for this task
-    python_callable=push_xcom_value,            # Python function to be executed by this task
-    provide_context=True,                       # This ensures the function gets the necessary keyword arguments like 'ti'
-    dag=dag                                     # Link this task to the previously defined DAG
+    task_id='push_task',  # Unique identifier for this task
+    python_callable=push_xcom_value, # Python function to be executed by this task
+    provide_context=True, # This ensures the function gets the necessary keyword arguments like 'ti'
+    dag=dag  # Link this task to the previously defined DAG
 )
 
 
@@ -62,8 +67,9 @@ def pull_xcom_value(**kwargs):
     Retrieves the value stored under key `sample_key` from the `push_task`
     execution and prints it to standard output.
     """
-    ti = kwargs['ti']                           # Extract the task instance from the provided kwargs
-    pulled_value = ti.xcom_pull(task_ids='push_task', key='sample_key')  # Use xcom_pull to retrieve the value from XCom
+    ti = kwargs['ti'] # Extract the task instance from the provided kwargs
+    # Use xcom_pull to retrieve the value from XCom
+    pulled_value = ti.xcom_pull(task_ids='push_task', key='sample_key')
     print(f"Pulled Value from XCom: {pulled_value}")
 
 
@@ -76,4 +82,4 @@ pull_task = PythonOperator(
 
 # Setting the order in which the tasks will execute.
 # push_task will execute first, followed by pull_task, and finally bash_task.
-push_task >> pull_task
+DAG_FLOW = push_task >> pull_task

@@ -8,10 +8,10 @@ This DAG shows how to organize related tasks into a `TaskGroup` and set up
 dependencies. It contains simple BashOperators for illustrative purposes.
 """
 
+from datetime import datetime
 from airflow import DAG
 from airflow.operators.bash import BashOperator
 from airflow.utils.task_group import TaskGroup
-from datetime import datetime
 
 # Default DAG arguments
 default_args = {
@@ -25,7 +25,10 @@ dag = DAG(
     default_args=default_args,     # Default arguments for the DAG
     description='taskgroup DAG',
     tags=['Data Engineering courses',"Advanced"],
-    catchup=False,      # If set to True, Airflow will execute all instances between the DAG's start_date and the current day. Setting to False means skipping missed instances.
+    # If set to True,
+    # Airflow will execute all instances between the DAG's start_date and the current day.
+    # Setting to False means skipping missed instances.
+    catchup=False,
     schedule='@daily'  # Schedule interval (run at midnight every day)
 )
 
@@ -38,11 +41,11 @@ task1 = BashOperator(
 )
 
 # Using the TaskGroup context manager.
-with TaskGroup("grouped_tasks", dag=dag) as tg: 
+with TaskGroup("grouped_tasks", dag=dag) as tg:
     task2 = BashOperator(
         task_id='task2',
         bash_command='echo "Task 2"',
-        dag=dag   
+        dag=dag
     )
 
     task3 = BashOperator(
@@ -57,14 +60,16 @@ with TaskGroup("grouped_tasks", dag=dag) as tg:
         dag=dag
     )
 
-    task2 >> task4
-    task3 >> task4
+    GROUP_DAG_FLOW = [task2, task3] >> task4
 
 task5 = BashOperator(
     task_id='Create_txt_file',
-    bash_command='echo "Ceci est un fichier test" > /opt/airflow/dags/advance-features/sample_bis.txt',  # Create a txt file with text
+    # Create a txt file with text
+    bash_command="""
+    echo "Ceci est un fichier test" > /opt/airflow/dags/advance-features/sample_bis.txt
+    """,
     dag=dag
 )
 
 # Define the task dependencies
-task1 >> tg >> task5
+DAG_FLOW = task1 >> tg >> task5
