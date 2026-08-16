@@ -35,12 +35,31 @@ jobs:
           pip install apache-airflow-providers-mysql
           pip install pylint
 
-      - name: Debug airflow package
+      - name: Show airflow packages
         run: |
-          pwd
-          find . -name "airflow.py"
-          find . -type d -name "airflow"
-          
+          pip list | grep airflow
+
+      - name: Debug Airflow
+        run: |
+          pip show apache-airflow
+
+          python - <<'PY'
+          import sys
+
+          print("Python:", sys.version)
+          print("sys.path:")
+          for p in sys.path:
+              print(" ", p)
+
+          try:
+              import airflow
+              print("airflow module:", airflow)
+              print("airflow file:", getattr(airflow, "__file__", None))
+              print("airflow path:", getattr(airflow, "__path__", None))
+          except Exception as e:
+              print("Import airflow failed:", e)
+          PY
+
       - name: Verify Airflow installation
         run: |
           python -c "import airflow; print('Airflow path:', airflow.__file__)"
