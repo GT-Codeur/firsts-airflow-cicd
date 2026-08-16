@@ -114,9 +114,7 @@ def taskflow_dag():
     # task1_output runs before task2_output and task3_output
     # Both task2_output and task3_output run before task4_output
     # task4_output runs before create_txt_file
-    task1_output >> [task2_output, task3_output]
-    [task2_output, task3_output] >> task4_output
-    task4_output >> create_txt
+    task1_output >> [task2_output, task3_output] >> task4_output >> create_txt
 
 
 # Instantiate the DAG

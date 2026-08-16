@@ -35,5 +35,5 @@ def staging_agg_ea_year_sales():
                 """)
 
 
-if __name__ == "__main__": 
+if __name__ == "__main__":
     staging_agg_ea_year_sales()
