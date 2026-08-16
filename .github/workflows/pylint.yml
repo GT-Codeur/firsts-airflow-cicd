@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10"]
+        python-version: ["3.12"]
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
@@ -18,7 +18,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
           # 1. Fetch exact dependency constraints to prevent dependency hell
-        AIRFLOW_VERSION=2.10.0
+        AIRFLOW_VERSION=2.10.5
         CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${{ matrix.python-version }}.txt"
         
         # 2. Install Airflow, Pylint, and the dedicated Airflow plugin together
