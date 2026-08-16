@@ -24,7 +24,7 @@ jobs:
         python -c "
         import sys, subprocess
         py_ver = f'{sys.version_info.major}.{sys.version_info.minor}'
-        url = f'https://raw.githubusercontent.com{py_ver}.txt'
+        url = f'https://raw.githubusercontent.com/{py_ver}.txt'
         subprocess.run(['pip', 'install', 'apache-airflow==2.10.0', '--constraint', url], check=True)
         "
         
