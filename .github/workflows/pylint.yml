@@ -27,6 +27,4 @@ jobs:
         
     - name: Analysing the code with pylint
       run: |
-        # --load-plugins flags Airflow objects correctly
-        # --disable=pointless-statement permits tasks chained together with '>>'
         pylint --load-plugins=pylint_airflow --disable=pointless-statement $(git ls-files '*.py')
