@@ -23,7 +23,7 @@ jobs:
         
         # 1. Fetch exact dependency constraints for Airflow stability
         AIRFLOW_VERSION=2.10.3
-        CONSTRAINT_URL="https://githubusercontent.com/apache/airflow/constraints-${{ matrix.python-version }}.txt"
+        CONSTRAINT_URL="https://githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${{ matrix.python-version }}.txt"
         
         # 2. Install Airflow using official constraints
         pip install "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
