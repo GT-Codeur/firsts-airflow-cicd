@@ -35,6 +35,13 @@ jobs:
           pip install apache-airflow-providers-mysql
           pip install pylint
 
+      - name: Verify Airflow installation
+        run: |
+          python -c "import airflow; print('Airflow path:', airflow.__file__)"
+          python -c "from airflow import DAG; print('DAG import OK')"
+          python -c "from airflow.operators.empty import EmptyOperator; print('EmptyOperator OK')"
+          python -c "from airflow.providers.mysql.hooks.mysql import MySqlHook; print('MySqlHook OK')"
+
       - name: Run pylint
         run: |
           pylint --disable=pointless-statement $(git ls-files '*.py')
