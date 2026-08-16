@@ -30,7 +30,7 @@ jobs:
             --constraint \
             "https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
 
-          pip install apache-airflow
+          pip install apache-airflow-providers-common-sql
           pip install apache-airflow-providers-postgres
           pip install apache-airflow-providers-mysql
           pip install pylint
