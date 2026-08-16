@@ -27,4 +27,4 @@ jobs:
         
     - name: Analysing the code with pylint
       run: |
-        pylint --load-plugins=pylint_airflow --disable=pointless-statement $(git ls-files '*.py')
+        pylint --load-plugins=pylint_airflow $(git ls-files '*.py')
