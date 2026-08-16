@@ -25,7 +25,7 @@ jobs:
         PYTHON_VERSION="${{ matrix.python-version }}"
         
         # 2. CRITICAL FIX: Concatenate purely with $ tokens so GitHub leaves it alone
-        CONSTRAINT_URL="https://raw.githubusercontent.com"$AIRFLOW_VERSION"/constraints-"$PYTHON_VERSION".txt"
+        CONSTRAINT_URL="https://raw.githubusercontent.com"/$AIRFLOW_VERSION"/constraints-"$PYTHON_VERSION".txt"
         
         # 3. Use raw string concatenation for the pip command as well
         pip install "apache-airflow=="$AIRFLOW_VERSION --constraint "$CONSTRAINT_URL"
