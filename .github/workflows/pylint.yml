@@ -20,15 +20,15 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         
-        # 1. Store variables using standard bash format
+        # 1. Define specific baseline software metrics
         AIRFLOW_VERSION="2.10.0"
         PYTHON_VERSION="${{ matrix.python-version }}"
         
-        # 2. Use simple dollar-signs without brackets so GitHub does not break the URL
-        CONSTRAINT_URL="https://githubusercontent.com"
+        # 2. CRITICAL FIX: Ensure 'raw.' prefixes the githubusercontent domain string
+        CONSTRAINT_URL="https://raw.githubusercontent.com{AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
         
-        # 3. Execute installation safely
-        pip install "apache-airflow==$AIRFLOW_VERSION" --constraint "$CONSTRAINT_URL"
+        # 3. Pull binaries and lock files over a valid internet connection
+        pip install "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
         pip install "pylint<3.0.0" pylint-airflow
         
     - name: Analysing the code with pylint
