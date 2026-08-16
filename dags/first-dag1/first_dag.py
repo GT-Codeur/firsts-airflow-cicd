@@ -1,3 +1,13 @@
+"""
+Author: Germain
+Descripition: Simple beginner DAG demonstrating basic task dependencies.
+Parameters: None
+Return Type: None
+
+Contains several BashOperator tasks that echo short messages and create a
+sample text file. Intended as an introductory example for DAG authors.
+"""
+
 from airflow import DAG
 from airflow.operators.bash import BashOperator
 from datetime import datetime
@@ -54,8 +64,4 @@ task5 = BashOperator(
 )
 
 # Define the dependencies
-task1 >> task2
-task1 >> task3
-task2 >> task4
-task3 >> task4
-task4 >> task5
+dag_flow = task1 >> [task2, task3] >> task4 >> task5

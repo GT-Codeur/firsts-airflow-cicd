@@ -1,3 +1,16 @@
+"""
+Author: Germain
+Descripition: ETL DAG that extracts a CSV of video game sales, transforms it,
+and loads Nintendo-specific rows into a MySQL table.
+Parameters: None
+Return Type: None
+
+This module implements `transform_data` to filter and normalize Nintendo game
+rows from a downloaded CSV and `load_data` to insert the transformed rows
+into a MySQL table via `MySqlHook`. The module also defines the DAG that
+executes these steps.
+"""
+
 from datetime import datetime, date
 import csv
 from airflow import DAG
@@ -7,13 +20,26 @@ from airflow.providers.mysql.hooks.mysql import MySqlHook
 
 
 def transform_data():
-    today = date.today()
+    """
+    Author: Germain
+    Descripition: Read the extracted CSV and produce a transformed CSV with only Nintendo rows.
+    Parameters: None
+    Return Type: None
+
+    Reads `/opt/airflow/dags/ETL-mysql-dag/staging/extract_videosgames_data.csv`,
+    filters rows where the publisher equals 'Nintendo', upper-cases the name,
+    and writes a new CSV `/opt/airflow/dags/ETL-mysql-dag/staging/transform_nintendo_games.csv`
+    with a header row and transformed rows.
+    """
     final = [] # Create an empty list to store the final data
 
     count_nintendo_games = 0 # Initialize a counter to keep track of the number of Nintendo games
 
     # Open the CSV file for reading
-    with open('/opt/airflow/dags/ETL-mysql-dag/staging/extract_videosgames_data.csv', 'r') as file:
+    with open(
+        '/opt/airflow/dags/ETL-mysql-dag/staging/extract_videosgames_data.csv',
+        'r', encoding="utf-8"
+    ) as file:
         reader = csv.reader(file)
         for row in reader:
             publisher_column = row[5]
@@ -24,18 +50,38 @@ def transform_data():
                 platform_column = row[2]        # Extract the platform column
                 year_game = row[3]            # Extract the year column
                 genre_column = row[4]           # Extract the genre column
-                transform_date = today.strftime('%Y-%m-%d') # Format today's date as 'YYYY-MM-DD'
+                # Format today's date as 'YYYY-MM-DD'
+                transform_date = date.today().strftime('%Y-%m-%d')
 
                 # Create a tuple containing the relevant data for the current Nintendo game
-                end = count_nintendo_games, name_column, platform_column, year_game, genre_column, transform_date                    
-                final.append(end) # Append the tuple to the final list    
+                end = (
+                    count_nintendo_games,
+                    name_column,
+                    platform_column,
+                    year_game,
+                    genre_column,
+                    transform_date
+                )
+                final.append(end) # Append the tuple to the final list
                 count_nintendo_games += 1 # Increment the count of Nintendo games
 
 
     # Define the header for the CSV file
-    header = ['count_nintendo_games', 'name_column', 'platform_column', 'year_game', 'genre_column', 'transform_date']
+    header = [
+        'count_nintendo_games',
+        'name_column',
+        'platform_column',
+        'year_game',
+        'genre_column',
+        'transform_date'
+    ]
     # Open the new CSV file for writing
-    with open('/opt/airflow/dags/ETL-mysql-dag/staging/transform_nintendo_games.csv', 'w', newline='') as output_file:
+    with open(
+        '/opt/airflow/dags/ETL-mysql-dag/staging/transform_nintendo_games.csv',
+        'w',
+        newline='',
+        encoding='utf-8'
+    ) as output_file:
         # Create a CSV writer object
         writer = csv.writer(output_file)
         writer.writerow(header) # Write the header to the CSV file
@@ -43,13 +89,23 @@ def transform_data():
 
 
 def load_data():
+    """
+    Author: Germain
+    Descripition: Load transformed Nintendo CSV rows into a MySQL table.
+    Parameters: None
+    Return Type: None
+
+    Reads `/opt/airflow/dags/ETL-mysql-dag/staging/transform_nintendo_games.csv`,
+    skips the header and inserts each row into the `nintendo_games` MySQL table
+    using `MySqlHook` and the `mysql_connection` connection id.
+    """
     csv_file_path = '/opt/airflow/dags/ETL-mysql-dag/staging/transform_nintendo_games.csv'
 
     # Establish a connection to the MySQL database using the MySQL hook
     mysql_hook = MySqlHook(mysql_conn_id='mysql_connection')
 
     # Open the transformed CSV file for reading
-    with open(csv_file_path, 'r') as csv_file:
+    with open(csv_file_path, 'r', encoding='utf-8') as csv_file:
         # Skip the header line
         next(csv_file)
 
@@ -67,7 +123,14 @@ def load_data():
                 INSERT INTO nintendo_games (GameCount, Name, Platform, Year, Genre, Date)
                 VALUES (%s, %s, %s, %s, %s, %s)
             '''
-            record_line = (count_nintendo_games, name_column, platform_column, year_game, genre_column, transform_date)
+            record_line = (
+                count_nintendo_games,
+                name_column,
+                platform_column,
+                year_game,
+                genre_column,
+                transform_date
+            )
 
             # Execute the MySQL query to insert data into the table
             mysql_hook.run(insert_query, parameters=record_line)
@@ -94,7 +157,10 @@ dag = DAG(
 # E - Extract
 extract_data_from_source = BashOperator(
     task_id='extract_data_from_source',
-    bash_command='curl -Lb "cookies.txt" "https://raw.githubusercontent.com/WillisN/airflow_course/main/sources/vgsales.csv" -o /opt/airflow/dags/ETL-mysql-dag/staging/extract_videosgames_data.csv',
+    bash_command="""curl -Lb "cookies.txt" \
+    "https://raw.githubusercontent.com/WillisN/airflow_course/main/sources/vgsales.csv" \
+        -o /opt/airflow/dags/ETL-mysql-dag/staging/extract_videosgames_data.csv
+    """,
     dag=dag
 )
 
@@ -112,4 +178,4 @@ load_data_to_mysql = PythonOperator(
     dag=dag
 )
 
-extract_data_from_source >> transform_data_from_source >> load_data_to_mysql
+DAG_FLOW = extract_data_from_source >> transform_data_from_source >> load_data_to_mysql

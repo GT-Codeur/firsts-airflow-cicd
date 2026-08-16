@@ -1,3 +1,14 @@
+"""
+Author: Germain
+Descripition: Example DAG to demonstrate Airflow catchup and backfill behavior.
+Parameters: None
+Return Type: None
+
+This DAG is configured with `catchup=True` and defines a single Python task
+that prints a provided message. It's useful for teaching how backfills operate
+across a DAG's `start_date` and schedule interval.
+"""
+
 from datetime import datetime
 from airflow import DAG
 from airflow.operators.python import PythonOperator
@@ -18,9 +29,19 @@ dag = DAG(
     schedule='30 10 * * *' #  Dag Run = start_date + schedule -> 2026/07/21 at 10:30
 )
 
-# Function to print a message
+
 def print_message(message):
+    """
+    Author: Germain
+    Descripition: Print the provided message to stdout.
+    Parameters: message (str) - the message to print
+    Return Type: None
+
+    A small helper used by a `PythonOperator` to demonstrate repeated task
+    execution during backfill/catchup scenarios.
+    """
     print(message)
+
 
 # Task to print a message for each execution
 print_message_task = PythonOperator(

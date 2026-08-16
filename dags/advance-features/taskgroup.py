@@ -1,3 +1,13 @@
+"""
+Author: Germain
+Descripition: Demonstrates grouping tasks using Airflow `TaskGroup`.
+Parameters: None
+Return Type: None
+
+This DAG shows how to organize related tasks into a `TaskGroup` and set up
+dependencies. It contains simple BashOperators for illustrative purposes.
+"""
+
 from airflow import DAG
 from airflow.operators.bash import BashOperator
 from airflow.utils.task_group import TaskGroup
