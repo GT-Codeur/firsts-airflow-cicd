@@ -13,7 +13,7 @@ three publisher-specific aggregation tasks (EA, Nintendo, Ubisoft).
 from datetime import datetime
 from airflow import DAG
 from airflow.operators.bash import BashOperator
-from airflow.operators.dummy_operator import DummyOperator
+from airflow.operators.empty import EmptyOperator
 from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
 #from airflow.operators.postgres_operator import PostgresOperator
 
@@ -33,7 +33,7 @@ dag = DAG(
 )
 
 # The start point of the DAG, represented by a DummyOperator
-start = DummyOperator(
+start = EmptyOperator(
     task_id='start',
     dag=dag
 )
@@ -81,7 +81,7 @@ agg_ubisoft_year_sales = BashOperator(
 )
 
 # The end point of the DAG, represented by a DummyOperator
-stop = DummyOperator(
+stop = EmptyOperator(
     task_id='stop',
     dag=dag
 )
