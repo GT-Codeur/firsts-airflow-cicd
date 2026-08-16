@@ -9,7 +9,6 @@ between each other using return values rather than XComs explicitly.
 """
 
 from datetime import datetime
-from airflow import DAG
 from airflow.decorators import task, dag
 
 # Default arguments for the DAG
