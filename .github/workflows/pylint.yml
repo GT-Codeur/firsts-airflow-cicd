@@ -26,13 +26,13 @@ jobs:
           PYTHON_VERSION=3.10
 
           pip install \
-            apache-airflow==2.10.5 \
+            "apache-airflow==${AIRFLOW_VERSION}" \
+            "apache-airflow-providers-postgres" \
+            "apache-airflow-providers-mysql" \
+            "apache-airflow-providers-common-sql" \
             --constraint \
             "https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
-
-          pip install apache-airflow-providers-common-sql
-          pip install apache-airflow-providers-postgres
-          pip install apache-airflow-providers-mysql
+          
           pip install pylint
 
       - name: Show airflow packages
